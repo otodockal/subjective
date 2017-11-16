@@ -8,7 +8,7 @@
 
 ## Examples
 - [Angular 5](https://stackblitz.com/edit/subjective?file=app%2Fproduct.state.ts)
-- [Tests](test/termix.test.ts)
+- [Tests](test/subjective.test.ts)
 
 ## Credits
 - ngrx

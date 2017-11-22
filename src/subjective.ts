@@ -17,8 +17,8 @@ export class Subjective<S> {
     /**
      * Dispatch update function, optionally with a payload
      * EXAMPLES:
-     * - store.dispatch(updateQuery)
-     * - store.dispatch(updateQuery, 'food')
+     * - state.dispatch(updateQuery)
+     * - state.dispatch(updateQuery, 'food')
      */
     dispatch<DATA>(
         updateFunction: (state: S, payload?: DATA) => S,
@@ -32,8 +32,8 @@ export class Subjective<S> {
      * - return always partial state defined by the key
      * - return whole state if returnWholeState param is true
      * EXAMPLES:
-     * - store.key$('items')
-     * - store.key$('items', true)
+     * - state.key$('items')
+     * - state.key$('items', true)
      */
     key$<K extends keyof S>(key: K, returnWholeState?: false): Observable<S[K]>;
     key$<K extends keyof S>(key: K, returnWholeState: true): Observable<S>;
@@ -75,12 +75,12 @@ export class Subjective<S> {
 }
 
 export class SubjectiveStore {
-    private _stores: SubjectiveItem<any>[] = [];
+    private _states: SubjectiveItem<any>[] = [];
 
-    constructor(stores: any[]) {
-        for (const store of stores) {
-            const s = new store();
-            this._stores.push({
+    constructor(states: any[]) {
+        for (const state of states) {
+            const s = new state();
+            this._states.push({
                 type: s,
                 value: new Subjective(s),
             });
@@ -88,10 +88,10 @@ export class SubjectiveStore {
     }
 
     /**
-     * Select store by given type
+     * Select state by given type
      */
     select<S>(type: { new (arg): S }): Subjective<S> {
-        for (const item of this._stores) {
+        for (const item of this._states) {
             if (item.type instanceof type) {
                 return item.value;
             }

@@ -28,24 +28,44 @@ export class Subjective<S> {
     }
 
     /**
-     * An observable of key of the state
-     * - return always partial state defined by the key
-     * - return whole state if returnWholeState param is true
+     * Observable two levels state key selector
+     * - return value of the key or whole state
      * EXAMPLES:
      * - state.key$('items')
      * - state.key$('items', true)
+     * - state.key$('filter', 'types')
+     * - state.key$('filter', 'types', true)
      */
+    key$<K extends keyof S, K1 extends keyof S[K]>(
+        key: K,
+        nestedKey: K1,
+        returnWholeState?: false,
+    ): Observable<S[K][K1]>;
+    key$<K extends keyof S, K1 extends keyof S[K]>(
+        key: K,
+        nestedKey: K1,
+        returnWholeState: true,
+    ): Observable<S>;
     key$<K extends keyof S>(key: K, returnWholeState?: false): Observable<S[K]>;
     key$<K extends keyof S>(key: K, returnWholeState: true): Observable<S>;
-    key$<K extends keyof S>(
+    key$<K extends keyof S, K1 extends keyof S[K]>(
         key: K,
+        nestedKey?: K1,
         returnWholeState?: boolean,
-    ): Observable<S | S[K]> {
-        return this.$.pipe(
-            ...[
-                distinctUntilKeyChanged(key),
-                returnWholeState ? null : map(s => s[key as any]),
-            ].filter(i => i !== null),
+    ): Observable<S | S[K] | S[K][K1]> {
+        let s = this.$.pipe(...this._distinctUntilKeyChanged(key));
+
+        if (typeof nestedKey === 'string') {
+            s = s.pipe(...this._distinctUntilKeyChanged(nestedKey));
+        }
+
+        return s.pipe(
+            map(value => {
+                return (typeof nestedKey === 'boolean' && nestedKey === true) ||
+                    returnWholeState === true
+                    ? this.snapshot
+                    : value;
+            }),
         );
     }
 
@@ -71,6 +91,10 @@ export class Subjective<S> {
      */
     get initialState() {
         return this._initialState;
+    }
+
+    private _distinctUntilKeyChanged(key: string) {
+        return [distinctUntilKeyChanged(key), map(s => s[key])];
     }
 }
 

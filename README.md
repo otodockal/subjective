@@ -3,7 +3,7 @@
 * Type safety dispatcher and observable state
 * Favors simple functions and immutable pattern for updating the state
 * State as a class (optional, but recommended)
-* Subscribe to a particular key of the state, return the key or the whole state
+* Subscribe to a particular key of the state (can be one level nested), return value of the key or the whole state
 
 ## Usage
 

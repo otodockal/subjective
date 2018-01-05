@@ -5,7 +5,7 @@ import { distinctUntilChanged } from 'rxjs/operators/distinctUntilChanged';
 import { map } from 'rxjs/operators/map';
 
 interface SubjectiveItem<S> {
-    type: { new (arg): S };
+    type: { new (arg: any): S };
     value: Subjective<S>;
 }
 
@@ -94,7 +94,7 @@ export class Subjective<S> {
     }
 
     private _distinctUntilKeyChanged(key: string) {
-        return [distinctUntilKeyChanged(key), map(s => s[key])];
+        return [distinctUntilKeyChanged(key), map((s: any) => s[key])];
     }
 }
 
@@ -114,7 +114,7 @@ export class SubjectiveStore {
     /**
      * Select state by given type
      */
-    select<S>(type: { new (arg): S }): Subjective<S> {
+    select<S>(type: { new (arg: any): S }): Subjective<S> | undefined {
         for (const item of this._states) {
             if (item.type instanceof type) {
                 return item.value;

@@ -4,11 +4,6 @@ import { distinctUntilKeyChanged } from 'rxjs/operators/distinctUntilKeyChanged'
 import { distinctUntilChanged } from 'rxjs/operators/distinctUntilChanged';
 import { map } from 'rxjs/operators/map';
 
-interface SubjectiveItem<S> {
-    type: { new (arg: any): S };
-    value: Subjective<S>;
-}
-
 export class Subjective<S> {
     private _subject = new BehaviorSubject<S>(this._initialState);
 
@@ -20,10 +15,15 @@ export class Subjective<S> {
      * - state.dispatch(updateQuery)
      * - state.dispatch(updateQuery, 'food')
      */
+    dispatch(updateFunction: (state: S) => S): void;
+    dispatch<DATA>(
+        updateFunction: (state: S, payload: DATA) => S,
+        payload: { [K in keyof DATA]: DATA[K] },
+    ): void;
     dispatch<DATA>(
         updateFunction: (state: S, payload?: DATA) => S,
         payload?: { [K in keyof DATA]: DATA[K] },
-    ) {
+    ): void {
         this._subject.next(updateFunction.call(null, this.snapshot, payload));
     }
 
@@ -93,32 +93,12 @@ export class Subjective<S> {
         return this._initialState;
     }
 
-    private _distinctUntilKeyChanged(key: string) {
-        return [distinctUntilKeyChanged(key), map((s: any) => s[key])];
-    }
-}
-
-export class SubjectiveStore {
-    private _states: SubjectiveItem<any>[] = [];
-
-    constructor(states: any[]) {
-        for (const state of states) {
-            const s = new state();
-            this._states.push({
-                type: s,
-                value: new Subjective(s),
-            });
-        }
-    }
-
-    /**
-     * Select state by given type
-     */
-    select<S>(type: { new (arg: any): S }): Subjective<S> | undefined {
-        for (const item of this._states) {
-            if (item.type instanceof type) {
-                return item.value;
-            }
-        }
+    private _distinctUntilKeyChanged<K extends keyof S, K1 extends keyof S[K]>(
+        key: K | K1,
+    ) {
+        return [
+            distinctUntilKeyChanged(key),
+            map((state: S & S[K]) => state[key]),
+        ];
     }
 }

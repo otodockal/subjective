@@ -1,14 +1,34 @@
-import { Subjective, SubjectiveStore } from '../src/subjective';
+import { Subjective } from '../src/subjective';
 import { Observable } from 'rxjs/Observable';
 import { skip } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
-export interface FilterA {
+// CounterState
+class CounterState {
+    count = 0;
+}
+
+function increaseCount(state: CounterState): CounterState {
+    return {
+        ...state,
+        count: state.count + 1,
+    };
+}
+
+function updateCount(state: CounterState, count: number): CounterState {
+    return {
+        ...state,
+        count,
+    };
+}
+
+// ProductState
+interface FilterA {
     id: string;
     name: string;
 }
 
-export interface FilterB {
+interface FilterB {
     id: string;
     name: string;
 }
@@ -68,6 +88,18 @@ describe('Subjective', () => {
         if (subscription) {
             subscription.unsubscribe();
         }
+    });
+
+    it('dispatch - no payload', () => {
+        const state = new Subjective(new CounterState());
+        state.dispatch(increaseCount);
+        expect(state.snapshot.count).toBe(1);
+    });
+
+    it('dispatch - payload', () => {
+        const state = new Subjective(new CounterState());
+        state.dispatch(updateCount, 10);
+        expect(state.snapshot.count).toBe(10);
     });
 
     it(`key$ - should
@@ -298,27 +330,18 @@ describe('Subjective', () => {
         const state = new Subjective(new ProductState());
 
         expect(state.snapshot.query).toBe('');
-
         state.dispatch(updateQuery, 'Oto');
-
         expect(state.snapshot.query).toBe('Oto');
     });
-});
 
-describe('SubjectiveStore', () => {
-    it('should select ProductState', () => {
-        const subjectiveStore = new SubjectiveStore([ProductState]);
-        const state = subjectiveStore.select(ProductState);
-
-        expect(state.snapshot).toEqual({
-            query: '',
-            position: 0,
-            filter: {
-                a: [],
-                b: [],
-                c: true,
-            },
-            items: [],
-        });
+    it('initialState - after updating the state, should return init value', () => {
+        const state = new Subjective(new ProductState());
+        // update state
+        expect(state.snapshot.query).toBe('');
+        state.dispatch(updateQuery, 'Oto');
+        expect(state.snapshot.query).toBe('Oto');
+        // verify initial state
+        expect(state.initialState).toEqual(new ProductState());
     });
+
 });

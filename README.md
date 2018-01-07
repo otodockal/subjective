@@ -7,7 +7,7 @@
 
 ## Usage
 
-* Observable Service in Angular (using Subjective or SubjectiveStore)
+* Observable Service in Angular
 * Observable Store
 
 ## Examples

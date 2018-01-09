@@ -15,7 +15,7 @@
 * [Angular](https://stackblitz.com/edit/subjective?file=app%2Fcore%2Fstores%2Fproduct%2Fproduct.state.ts)
 * [Tests](test/subjective.test.ts)
 
-![](./assets/example.png)
+![](./assets/example_white.png)
 
 ## Credits
 

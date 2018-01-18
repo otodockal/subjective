@@ -1,8 +1,14 @@
 {
   "name": "subjective",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Type safety dispatcher and observable state",
-  "keywords": [],
+  "keywords": [
+    "RxJS",
+    "state",
+    "Angular",
+    "React",
+    "Redux"
+  ],
   "main": "./dist/subjective.umd.js",
   "module": "./dist/subjective.js",
   "files": [

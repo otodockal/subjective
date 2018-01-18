@@ -102,6 +102,22 @@ describe('Subjective', () => {
         expect(state.snapshot.count).toBe(10);
     });
 
+    it('dispatch - should return the last updated state', () => {
+        const state = new Subjective(new CounterState());
+
+        const s1 = state.dispatch(updateCount, 10);
+        const s2 = state.dispatch(updateCount, 11);
+        const s3 = state.dispatch(updateCount, 12);
+
+        expect(s1).toEqual({ count: 10 });
+        expect(s2).toEqual({ count: 11 });
+        expect(s3).toEqual({ count: 12 });
+
+        expect(s1 === s2).toBe(false);
+        expect(s1 === s3).toBe(false);
+        expect(s2 === s3).toBe(false);
+    });
+
     it(`key$ - should
         1. update prop query, 
         2. call subscribe callback on query prop change
@@ -343,5 +359,4 @@ describe('Subjective', () => {
         // verify initial state
         expect(state.initialState).toEqual(new ProductState());
     });
-
 });

@@ -10,21 +10,24 @@ export class Subjective<S> {
     constructor(private _initialState: S) {}
 
     /**
-     * Dispatch update function, optionally with a payload
+     * Dispatch update function, optionally with a payload, and return the last snapshot of updated state
      * EXAMPLES:
      * - state.dispatch(updateQuery)
      * - state.dispatch(updateQuery, 'food')
+     * - const lastState = state.dispatch(updateQuery)
+     * - const lastState = state.dispatch(updateQuery, 'food')
      */
-    dispatch(updateFunction: (state: S) => S): void;
+    dispatch(updateFunction: (state: S) => S): S;
     dispatch<DATA>(
         updateFunction: (state: S, payload: DATA) => S,
         payload: { [K in keyof DATA]: DATA[K] },
-    ): void;
+    ): S;
     dispatch<DATA>(
         updateFunction: (state: S, payload?: DATA) => S,
         payload?: { [K in keyof DATA]: DATA[K] },
-    ): void {
+    ): S {
         this._subject.next(updateFunction.call(null, this.snapshot, payload));
+        return this.snapshot;
     }
 
     /**

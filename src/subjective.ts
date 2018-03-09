@@ -56,10 +56,14 @@ export class Subjective<S> {
         nestedKey?: K1,
         returnWholeState?: boolean,
     ): Observable<S | S[K] | S[K][K1]> {
-        let s = this.$.pipe(...this._distinctUntilKeyChanged(key));
+        let self = null;
+        let s: Observable<S[K] | S[K][K1]> = (self = this.$).pipe.apply(
+            self,
+            this._distinctUntilKeyChanged(key),
+        );
 
         if (typeof nestedKey === 'string') {
-            s = s.pipe(...this._distinctUntilKeyChanged(nestedKey));
+            s = this.$.pipe.apply(s, this._distinctUntilKeyChanged(nestedKey));
         }
 
         return s.pipe(
@@ -96,12 +100,7 @@ export class Subjective<S> {
         return this._initialState;
     }
 
-    private _distinctUntilKeyChanged<K extends keyof S, K1 extends keyof S[K]>(
-        key: K | K1,
-    ) {
-        return [
-            distinctUntilKeyChanged(key),
-            map((state: S & S[K]) => state[key]),
-        ];
+    private _distinctUntilKeyChanged(key: any): any[] {
+        return [distinctUntilKeyChanged(key), map((state: any) => state[key])];
     }
 }

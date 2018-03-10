@@ -108,7 +108,7 @@ describe('Subjective', () => {
         const s1 = state.dispatch(updateCount, 10);
         const s2 = state.dispatch(updateCount, 11);
         const s3 = state.dispatch(updateCount, 12);
-
+        
         expect(s1).toEqual({ count: 10 });
         expect(s2).toEqual({ count: 11 });
         expect(s3).toEqual({ count: 12 });
@@ -118,13 +118,13 @@ describe('Subjective', () => {
         expect(s2 === s3).toBe(false);
     });
 
-    it(`key$ - should
+    it(`select - should
         1. update prop query, 
         2. call subscribe callback on query prop change
         3. return value of query
     `, done => {
         const state = new Subjective(new ProductState());
-        const obs = state.key$('query');
+        const obs = state.select(s => s.query);
 
         subscription = obs.pipe(skip(1)).subscribe(value => {
             expect(value).toBe('Oto');
@@ -140,13 +140,13 @@ describe('Subjective', () => {
         ]);
     });
 
-    it(`key$ - should
+    it(`select - should
         1. update prop query, 
         2. call subscribe callback on query prop change
         3. return whole state
     `, done => {
         const state = new Subjective(new ProductState());
-        const obs = state.key$('query', true);
+        const obs = state.select(s => s.query, true);
 
         subscription = obs.pipe(skip(1)).subscribe(value => {
             expect(value).toEqual({
@@ -167,13 +167,13 @@ describe('Subjective', () => {
         ]);
     });
 
-    it(`key$ - should
+    it(`select - should
         1. update prop filter,
         2. call subscribe callback on filter prop change
         3. return value of filter
     `, done => {
         const state = new Subjective(new ProductState());
-        const obs = state.key$('filter');
+        const obs = state.select(s => s.filter);
 
         subscription = obs.pipe(skip(1)).subscribe(value => {
             expect(value).toEqual({
@@ -193,13 +193,13 @@ describe('Subjective', () => {
         ]);
     });
 
-    it(`key$ - should
+    it(`select - should
         1. update prop filter,
         2. call subscribe callback on filter prop change
         3. return whole state
     `, done => {
         const state = new Subjective(new ProductState());
-        const obs = state.key$('filter', true);
+        const obs = state.select(s => s.filter, true);
 
         subscription = obs.pipe(skip(1)).subscribe(value => {
             expect(value).toEqual({
@@ -220,13 +220,13 @@ describe('Subjective', () => {
         ]);
     });
 
-    it(`key$ - should
+    it(`select - should
         1. update prop filter.a,
         2. call subscribe callback on filter prop change
         3. return value of filter.a
     `, done => {
         const state = new Subjective(new ProductState());
-        const obs = state.key$('filter', 'a');
+        const obs = state.select(s => s.filter.a);
 
         subscription = obs.pipe(skip(1)).subscribe(value => {
             expect(value).toEqual([{ id: '1', name: 'FilterA' }]);
@@ -242,13 +242,13 @@ describe('Subjective', () => {
         ]);
     });
 
-    it(`key$ - should
+    it(`select - should
         1. update prop filter.a,
         2. call subscribe callback on filter prop change
         3. return whole state
     `, done => {
         const state = new Subjective(new ProductState());
-        const obs = state.key$('filter', 'a', true);
+        const obs = state.select(s => s.filter.a, true);
 
         subscription = obs.pipe(skip(1)).subscribe(value => {
             expect(value).toEqual({
@@ -279,7 +279,7 @@ describe('Subjective', () => {
         ]);
     });
 
-    it(`key$ - should
+    it(`select - should
         1. update prop filter.c,
         2. call subscribe callback on filter prop change
         3. return whole state
@@ -289,7 +289,7 @@ describe('Subjective', () => {
             3. true
     `, done => {
         const state = new Subjective(new ProductState());
-        const obs = state.key$('filter', 'c', true);
+        const obs = state.select(s => s.filter.c, true);
 
         subscription = obs.pipe(skip(2)).subscribe(value => {
             expect(value).toEqual({
@@ -322,10 +322,11 @@ describe('Subjective', () => {
         state.dispatch(updateFilterC, true);
     });
 
-    it(`$ - should return whole state`, done => {
+    it(`select - should return whole state`, done => {
         const state = new Subjective(new ProductState());
+        const obs = state.select(s => s);
 
-        subscription = state.$.pipe(skip(1)).subscribe(value => {
+        subscription = obs.pipe(skip(1)).subscribe(value => {
             expect(value).toEqual({
                 query: 'Oto',
                 position: 0,

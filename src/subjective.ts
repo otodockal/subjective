@@ -1,6 +1,5 @@
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
-import { distinctUntilKeyChanged } from 'rxjs/operators/distinctUntilKeyChanged';
 import { distinctUntilChanged } from 'rxjs/operators/distinctUntilChanged';
 import { map } from 'rxjs/operators/map';
 
@@ -31,57 +30,27 @@ export class Subjective<S> {
     }
 
     /**
-     * Observable two levels state key selector
+     * State selector
+     * - subscribe to a key defined by mapFn
      * - return value of the key or whole state
      * EXAMPLES:
-     * - state.key$('items')
-     * - state.key$('items', true)
-     * - state.key$('filter', 'types')
-     * - state.key$('filter', 'types', true)
+     * - state.select(s => s.items)
+     * - state.select(s => s.items, true)
+     * - state.select(s => s.filter.types)
+     * - state.select(s => s.filter.types, true)
      */
-    key$<K extends keyof S, K1 extends keyof S[K]>(
-        key: K,
-        nestedKey: K1,
-        returnWholeState?: false,
-    ): Observable<S[K][K1]>;
-    key$<K extends keyof S, K1 extends keyof S[K]>(
-        key: K,
-        nestedKey: K1,
-        returnWholeState: true,
-    ): Observable<S>;
-    key$<K extends keyof S>(key: K, returnWholeState?: false): Observable<S[K]>;
-    key$<K extends keyof S>(key: K, returnWholeState: true): Observable<S>;
-    key$<K extends keyof S, K1 extends keyof S[K]>(
-        key: K,
-        nestedKey?: K1,
-        returnWholeState?: boolean,
-    ): Observable<S | S[K] | S[K][K1]> {
-        let s: Observable<S | S[K]> = this.$.pipe(distinctUntilKeyChanged(key));
-
-        if (typeof nestedKey === 'string') {
-            s = (s as Observable<S>).pipe(
-                map(i => i[key]),
-                distinctUntilKeyChanged(nestedKey),
-            );
-        }
-
-        return s.pipe(
+    select<K>(mapFn: (state: S) => K, returnWholeState?: false): Observable<K>;
+    select<K>(mapFn: (state: S) => K, returnWholeState: true): Observable<S>;
+    select<K>(mapFn: (state: S) => K, returnWholeState?: boolean): Observable<K | S> {
+        return this._subject.pipe(
+            map(state => mapFn(state)),
+            distinctUntilChanged(),
             map(value => {
-                return returnWholeState === true ||
-                    (typeof nestedKey === 'boolean' && nestedKey === true)
+                return returnWholeState === true
                     ? this.snapshot
-                    : typeof nestedKey === 'string'
-                        ? (value as S[K])[nestedKey]
-                        : (value as S)[key];
+                    : value;
             }),
         );
-    }
-
-    /**
-     * An observable of the state
-     */
-    get $(): Observable<S> {
-        return this._subject.pipe(distinctUntilChanged());
     }
 
     /**

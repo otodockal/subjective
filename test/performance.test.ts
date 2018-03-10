@@ -4,6 +4,7 @@ import { distinctUntilKeyChanged } from 'rxjs/operators/distinctUntilKeyChanged'
 import { Subjective } from '../src/subjective';
 import { bufferCount } from 'rxjs/operators';
 import { map } from 'rxjs/operators/map';
+import { distinctUntilChanged } from 'rxjs/operators/distinctUntilChanged';
 const { performance } = require('perf_hooks');
 
 interface FilterA {
@@ -42,15 +43,15 @@ describe('Performance', () => {
         }
     });
 
-    fit(`performance test - Subjective`, done => {
+    it(`performance test - Subjective`, done => {
         const state = new Subjective(new ProductState());
         const t0 = performance.now();
 
         subscription = state
-            .key$('filter', 'a')
+            .select(s => s.filter.a)
             .pipe(bufferCount(iterations))
             .subscribe(res => {
-                console.log('Subjective: ' + (performance.now() - t0) + ' ms.');
+                console.log('Subjective select(): ' + (performance.now() - t0) + ' ms.');
                 done();
             });
 
@@ -62,17 +63,15 @@ describe('Performance', () => {
         }
     });
 
-    fit('performance test - BehaviorSubject', done => {
+    it('performance test - BehaviorSubject', done => {
         const productState = new ProductState();
         const state = new BehaviorSubject(productState);
         const t0 = performance.now();
 
         subscription = state
             .pipe(
-                distinctUntilKeyChanged('filter'),
-                map(i => i.filter),
-                distinctUntilKeyChanged('a'),
-                map(i => i.a),
+                map(s => s.filter.a),
+                distinctUntilChanged(),
                 bufferCount(iterations),
             )
             .subscribe(res => {
@@ -94,17 +93,15 @@ describe('Performance', () => {
         }
     });
 
-    fit('performance test - BehaviorSubject - mutations', done => {
+    it('performance test - BehaviorSubject - mutations', done => {
         const productState = new ProductState();
         const state = new BehaviorSubject(productState);
         const t0 = performance.now();
 
         subscription = state
             .pipe(
-                // distinctUntilKeyChanged('filter'),   // NOTE: we can't, mutations
-                map(i => i.filter),
-                // distinctUntilKeyChanged('a'),        // NOTE: we can't, mutations
-                map(i => i.a),
+                map(i => i.filter.a),
+                // distinctUntilChanged(),     // NOTE: we can't because of mutations                
                 bufferCount(iterations),
             )
             .subscribe(res => {

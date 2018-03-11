@@ -1,6 +1,6 @@
 {
   "name": "subjective",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "Subjective state management for your app.",
   "keywords": [
     "RxJS",

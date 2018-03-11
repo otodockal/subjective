@@ -16,22 +16,22 @@ export class Subjective<S> {
      * - const lastState = state.dispatch(updateQuery)
      * - const lastState = state.dispatch(updateQuery, 'food')
      */
-    dispatch(updateFunction: (state: S) => S): S;
+    dispatch(updateFn: (state: S) => S): S;
     dispatch<DATA>(
-        updateFunction: (state: S, payload: DATA) => S,
+        updateFn: (state: S, payload: DATA) => S,
         payload: { [K in keyof DATA]: DATA[K] },
     ): S;
     dispatch<DATA>(
-        updateFunction: (state: S, payload?: DATA) => S,
+        updateFn: (state: S, payload?: DATA) => S,
         payload?: { [K in keyof DATA]: DATA[K] },
     ): S {
-        this._subject.next(updateFunction.call(null, this.snapshot, payload));
+        this._subject.next(updateFn.call(null, this.snapshot, payload));
         return this.snapshot;
     }
 
     /**
      * State selector
-     * - subscribe to a key defined by mapFn
+     * - subscribe to a key defined by selectorFn
      * - return value of the key or whole state
      * EXAMPLES:
      * - state.select(s => s.items)
@@ -39,16 +39,23 @@ export class Subjective<S> {
      * - state.select(s => s.filter.types)
      * - state.select(s => s.filter.types, true)
      */
-    select<K>(mapFn: (state: S) => K, returnWholeState?: false): Observable<K>;
-    select<K>(mapFn: (state: S) => K, returnWholeState: true): Observable<S>;
-    select<K>(mapFn: (state: S) => K, returnWholeState?: boolean): Observable<K | S> {
+    select<K>(
+        selectorFn: (state: S) => K,
+        returnWholeState?: false,
+    ): Observable<K>;
+    select<K>(
+        selectorFn: (state: S) => K,
+        returnWholeState: true,
+    ): Observable<S>;
+    select<K>(
+        selectorFn: (state: S) => K,
+        returnWholeState?: boolean,
+    ): Observable<K | S> {
         return this._subject.pipe(
-            map(state => mapFn(state)),
+            map(state => selectorFn(state)),
             distinctUntilChanged(),
             map(value => {
-                return returnWholeState === true
-                    ? this.snapshot
-                    : value;
+                return returnWholeState === true ? this.snapshot : value;
             }),
         );
     }

@@ -1,7 +1,7 @@
 {
   "name": "subjective",
   "version": "3.0.0",
-  "description": "Type safety dispatcher and observable state",
+  "description": "Subjective state management for your app.",
   "keywords": [
     "RxJS",
     "state",
@@ -9,12 +9,12 @@
     "React",
     "Redux"
   ],
-  "main": "./dist/subjective.umd.js",
-  "module": "./dist/subjective.js",
+  "main": "dist/subjective.cjs.js",
+  "module": "dist/subjective.esm.js",
+  "browser": "dist/subjective.umd.js",
+  "typings": "dist/types/subjective.d.ts",
   "files": [
-    "dist",
-    "index.d.ts",
-    "index.js"
+    "dist"
   ],
   "author": "otodockal <oto.dockal@gmail.com>",
   "repository": {

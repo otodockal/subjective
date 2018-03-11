@@ -1,13 +1,21 @@
 # Subjective
 
 *   Type safety dispatcher and observable state
-*   Favors simple functions and immutable pattern for updating the state
+*   Favors simple functions either for updating the state or as a state selector
 *   State as a class (optional, but recommended)
-*   Subscribe to a particular key of the state defined by mapFn in select method, return value of the key or the whole state
+
+## Concepts
+
+*   State
+    *   const state = **new Subjective(new MyState())**
+*   Update function
+    *   state.dispatch(**updateFilterA**, item)
+*   Selector function
+    *   state.select(**s => s.filter.a**)
 
 ## Usage
 
-*   Observable Service in Angular
+*   [Observable Service in Angular](#observable-service-in-angular)
 *   Observable Store
 
 ## Examples
@@ -22,7 +30,7 @@
 ### Service & State
 
 Service is @Injectable and contains a reference to the state and async methods (for communication with backend).
-The state is instantiated as state property in Angular Service, but the whole state is defined in xy.state.ts file together with update functions.
+The state is instantiated as state property in Angular Service, but the whole state is defined together with **update functions** in xy.state.ts file.
 
 *   core
     *   stores
@@ -35,22 +43,17 @@ The state is instantiated as state property in Angular Service, but the whole st
 
 ### Dispatch Update function
 
-Dispatch update function defined in product.state.ts optionally with a payload.
+Dispatch **update function** defined in product.state.ts optionally with a payload.
 Payload type is inferred from the update function.
 
 ```typescript
 @Component({})
 export class ProductDetailComponent {
+    constructor(private _productService: ProductService) {}
 
-  constructor(private _productService: ProductService) { }
-
-  addLike(item: ProductItem) {
-    this._productService.state.dispatch(
-      addLike,
-      item
-    );
-  }
-
+    addLike(item: ProductItem) {
+        this._productService.state.dispatch(addLike, item);
+    }
 }
 ```
 
@@ -62,48 +65,42 @@ Dispatch method returns a snapshot of last updated state.
 ```typescript
 @Component({})
 export class FilterTypeComponent {
-  @Output() search = new EventEmitter<Filter>();
+    @Output() search = new EventEmitter<Filter>();
 
-  constructor(private _productService: ProductService) { }
+    constructor(private _productService: ProductService) {}
 
-  filter(type: FilterType) {
-    // set filter.type
-    const lastUpdatedState = this._productService.state.dispatch(
-      replaceFilterType,
-      type
-    );
-    // search by whole filter
-    // {filter: {type: string, price: number}}
-    this.search.emit(
-      lastUpdatedState.filter
-    );
-  }
+    filter(type: FilterType) {
+        // update filter type & get last updated state
+        const lastUpdatedState = this._productService.state.dispatch(
+            replaceFilterType,
+            type,
+        );
+
+        // search by filter
+        this.search.emit(lastUpdatedState.filter);
+    }
 }
 ```
 
 ### Subscribe to a state
 
-Subscribe to a particular key of the state defined by mapFn in select method and return value of the key.
+Subscribe to a particular key of the state defined by **selector function** in select method and return value of the key.
 
 ```typescript
-@Component({})
-export class FilterTypeComponent implements OnInit, OnDestroy {
-  private _onDestroy$ = new Subject();
+@Component({
+    selector: 'app-list',
+    template: `
+        <ul>
+            <li *ngFor="let item of items | async">
+                {{item.name}}
+            </li>
+        </ul>
+    `,
+})
+export class ListComponent {
+    items = this._productService.state.select(s => s.items);
 
-  constructor(private _productService: ProductService) { }
-
-  ngOnInit() {
-      // {filter: {type: string, price: number}}
-      this._productService.state.select(s => s.filter.type)
-        .pipe(takeUntil(this._onDestroy$))
-        .subscribe(type => {
-          // DO WHATEVER
-      })
-  }
-
-  ngOnDestroy() {
-    this._onDestroy$.next();
-  }
+    constructor(private _productService: ProductService) {}
 }
 ```
 
@@ -113,24 +110,34 @@ Sometimes you need to react to changes of a particular key of the state and get 
 By using the second argument in the select method, you can get the whole state in subscribe callback.
 
 ```typescript
-@Component({})
-export class FilterTypeComponent implements OnInit, OnDestroy {
-  private _onDestroy$ = new Subject();
+@Component({
+    selector: 'app-list',
+    template: `
+        <ng-container *ngIf="state | async as state">
+            <ng-container *ngIf="state.isLoading; else items">
+                loading...
+            </ng-container>
+            <ng-template #items>
+                <h2>{{state.type}}</h2>
+                <ul>
+                    <li *ngFor="let item of state.items">
+                        {{item.name}}
+                    </li>
+                </ul>
+            </ng-template>
+        </ng-container>
+    `,
+})
+export class ListComponent {
 
-  constructor(private _productService: ProductService) { }
+    state = merge(
+        this._productService.state
+            .select(s => s.items, true),
+        this._productService.state
+            .select(s => s.isLoading, true);
+    )
 
-  ngOnInit() {
-      // {filter: {type: string, price: number}}
-      this._productService.state.select(s => s.filter.type, true)
-        .pipe(takeUntil(this._onDestroy$))
-        .subscribe(state => {
-          // DO WHATEVER WITH WHOLE STATE
-      })
-  }
-
-  ngOnDestroy() {
-    this._onDestroy$.next();
-  }
+    constructor(private _productService: ProductService) {}
 }
 ```
 
@@ -153,5 +160,6 @@ Types are always inferred either from state class or payload parameter of the up
 
 ## Credits
 
-*   ngrx
-*   redux
+*   [RxJS](https://github.com/ReactiveX/rxjs)
+*   [ngrx](https://github.com/ngrx/platform)
+*   [Redux](https://github.com/reactjs/redux)

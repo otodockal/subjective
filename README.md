@@ -1,17 +1,17 @@
 # Subjective
 
-*   Type safety dispatcher and observable state
+*   Type safety state management
 *   Favors simple functions either for updating the state or as a state selector
 *   State as a class (optional, but recommended)
 
 ## Concepts
 
 *   State
-    *   const state = **new Subjective(new MyState())**
-*   Update function
-    *   state.dispatch(**updateFilterA**, item)
+    *   const state = **new Subjective(new MyState(), new MyStateFns())**
 *   Selector function
     *   state.select(**s => s.filter.a**)
+*   Update function
+    *   state.update(**f => f.updateFilterA**, item)
 
 ## Usage
 
@@ -23,7 +23,7 @@
 *   [Angular](https://stackblitz.com/edit/subjective?file=app%2Fcore%2Fstores%2Fproduct%2Fproduct.state.ts)
 *   [Tests](test/subjective.test.ts)
 
-![](./assets/example_white1.png)
+![](./assets/v4.png)
 
 ## Observable Service in Angular
 
@@ -41,9 +41,9 @@ The state is instantiated as state property in Angular Service, but the whole st
             *   product.service.ts
             *   product.state.ts
 
-### Dispatch Update function
+### Update state
 
-Dispatch **update function** defined in product.state.ts optionally with a payload.
+Update state by using **update functions** inside update method of state instance.
 Payload type is inferred from the update function.
 
 ```typescript
@@ -52,15 +52,15 @@ export class ProductDetailComponent {
     constructor(private _productService: ProductService) {}
 
     addLike(item: ProductItem) {
-        this._productService.state.dispatch(addLike, item);
+        this._productService.state.update(f => f.addLike, item);
     }
 }
 ```
 
-### Dispatch Update function & return Last state
+### Update state & return Last updated state
 
 Sometimes it's handy to have a snapshot of last updated state.
-Dispatch method returns a snapshot of last updated state.
+Update method returns a snapshot of last updated state.
 
 ```typescript
 @Component({})
@@ -71,11 +71,10 @@ export class FilterTypeComponent {
 
     filter(type: FilterType) {
         // update filter type & get last updated state
-        const lastUpdatedState = this._productService.state.dispatch(
-            replaceFilterType,
+        const lastUpdatedState = this._productService.state.update(
+            f => f.replaceFilterType,
             type,
         );
-
         // search by filter
         this.search.emit(lastUpdatedState.filter);
     }
@@ -148,11 +147,14 @@ Should be used rarely.
 
 ### Initial State
 
-Get the initial state of the state. It's handy when you need to reset particular part of the state.
+Get the initial state of the state.
+It gets handy when you need to reset particular part of the state.
+
+## NOTES
 
 ### Immutable pattern
 
-Always use immutable pattern otherwise it will not work. With mutations, we cannot simply compare what's been changed, object reference is always the same.
+Always use [immutable pattern](https://glimmerjs.com/guides/tracked-properties) otherwise it will not work. We can't rely on mutations since object reference is always the same.
 
 ### Type-safety
 

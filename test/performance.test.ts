@@ -23,14 +23,18 @@ class ProductState {
     items = [];
 }
 
-function updateFilterA(state: ProductState, a: FilterA[]): ProductState {
-    return {
-        ...state,
-        filter: {
-            ...state.filter,
-            a,
-        },
-    };
+class ProductStateFns {
+    
+    updateFilterA(state: ProductState, a: FilterA[]): ProductState {
+        return {
+            ...state,
+            filter: {
+                ...state.filter,
+                a,
+            },
+        };
+    }
+
 }
 
 describe('Performance', () => {
@@ -44,7 +48,7 @@ describe('Performance', () => {
     });
 
     it(`performance test - Subjective`, done => {
-        const state = new Subjective(new ProductState());
+        const state = new Subjective(new ProductState(), new ProductStateFns());
         const t0 = performance.now();
 
         subscription = state
@@ -56,7 +60,7 @@ describe('Performance', () => {
             });
 
         for (let index = 0; index < iterations; index++) {
-            state.dispatch(updateFilterA, [
+            state.update(f => f.updateFilterA, [
                 { id: '1', name: 'test' + index },
                 { id: '2', name: 'test2' },
             ]);

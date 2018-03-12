@@ -3,29 +3,36 @@ import { Observable } from 'rxjs/Observable';
 import { distinctUntilChanged } from 'rxjs/operators/distinctUntilChanged';
 import { map } from 'rxjs/operators/map';
 
-export class Subjective<S> {
+export class Subjective<S, F> {
     private _subject = new BehaviorSubject<S>(this._initialState);
 
-    constructor(private _initialState: S) {}
+    /**
+     * Subjective
+     * @param _initialState Inital state
+     * @param _updateFns Update functions
+     */
+    constructor(private _initialState: S, private _updateFns: F) {}
 
     /**
-     * Dispatch update function, optionally with a payload, and return the last snapshot of updated state
+     * Update function
+     * - optionally with a payload
+     * - return the last snapshot of updated state
      * EXAMPLES:
-     * - state.dispatch(updateQuery)
-     * - state.dispatch(updateQuery, 'food')
-     * - const lastState = state.dispatch(updateQuery)
-     * - const lastState = state.dispatch(updateQuery, 'food')
+     * - state.update(f => f.updateQuery)
+     * - state.update(f => f.updateQuery, 'food')
+     * - const lastState = state.update(f => f.updateQuery)
+     * - const lastState = state.update(f => f.updateQuery, 'food')
      */
-    dispatch(updateFn: (state: S) => S): S;
-    dispatch<DATA>(
-        updateFn: (state: S, payload: DATA) => S,
+    update(updateFn: (fns: F) => (state: S) => S): S;
+    update<DATA>(
+        updateFn: (fns: F) => (state: S, payload: DATA) => S,
         payload: { [K in keyof DATA]: DATA[K] },
     ): S;
-    dispatch<DATA>(
-        updateFn: (state: S, payload?: DATA) => S,
+    update<DATA>(
+        updateFn: (fns: F) => (state: S, payload: DATA) => S,
         payload?: { [K in keyof DATA]: DATA[K] },
     ): S {
-        this._subject.next(updateFn.call(null, this.snapshot, payload));
+        this._subject.next(updateFn(this._updateFns)(this.snapshot, payload!));
         return this.snapshot;
     }
 
@@ -71,7 +78,7 @@ export class Subjective<S> {
      * Initial state
      * - useful for resetting the state
      * EXAMPLES:
-     * - update functions should be pure, so dispatch update function with initial state
+     * - update functions should be pure, so update function with initial state
      */
     get initialState() {
         return this._initialState;

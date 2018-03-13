@@ -1,17 +1,38 @@
 # Subjective
 
-*   Type safety state management
-*   Favors simple functions either for updating the state or as a state selector
-*   State as a class (optional, but recommended)
+*   Opinionated state management
+*   Type safety by design
+*   Selector functions
+*   Update functions
+*   Composition
 
 ## Concepts
 
-*   State
-    *   const state = **new Subjective(new MyState(), new MyStateFns())**
-*   Selector function
-    *   state.select(**s => s.filter.a**)
-*   Update function
-    *   state.update(**f => f.updateFilterA**, item)
+### State
+
+```typescript
+// define new state
+const state = new Subjective(
+    new ProductState(), 
+    new ProductStateFns(),
+);
+```
+
+### Selector function
+
+```typescript
+// subscribe to state.filter.type
+state.select(s => s.filter.type).subscribe(type => {
+    console.log(type);
+});
+```
+
+### Update function
+
+```typescript
+// change value of state.filter.type
+state.update(f => f.updateFilterType, type);
+```
 
 ## Usage
 
@@ -49,10 +70,14 @@ Payload type is inferred from the update function.
 ```typescript
 @Component({})
 export class ProductDetailComponent {
+
     constructor(private _productService: ProductService) {}
 
     addLike(item: ProductItem) {
-        this._productService.state.update(f => f.addLike, item);
+        this._productService.state.update(
+            f => f.addLike,
+            item
+        );
     }
 }
 ```
@@ -65,6 +90,7 @@ Update method returns a snapshot of last updated state.
 ```typescript
 @Component({})
 export class FilterTypeComponent {
+    
     @Output() search = new EventEmitter<Filter>();
 
     constructor(private _productService: ProductService) {}
@@ -97,7 +123,10 @@ Subscribe to a particular key of the state defined by **selector function** in s
     `,
 })
 export class ListComponent {
-    items = this._productService.state.select(s => s.items);
+    
+    items = this._productService.state.select(
+        s => s.items
+    );
 
     constructor(private _productService: ProductService) {}
 }

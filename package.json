@@ -1,7 +1,7 @@
 {
   "name": "subjective",
-  "version": "4.0.1",
-  "description": "Type safety state management.",
+  "version": "4.0.2",
+  "description": "Opinionated state management",
   "keywords": [
     "RxJS",
     "state",

@@ -5,6 +5,7 @@
 *   Selector functions
 *   Update functions
 *   Composition
+*   RxJS 5.5 & RxJS 6 compatibility
 
 ## Concepts
 
@@ -15,8 +16,10 @@
 const state = new Subjective(
     productState,
     productStateFns,
-)
+);
 ```
+
+[EXAMPLE](https://stackblitz.com/edit/subjective?file=app%2Fcore%2Fstores%2Fproduct%2Fproduct.state.ts)
 
 ### Selector function
 
@@ -27,6 +30,8 @@ state.select(s => s.filter.type).subscribe(type => {
 });
 ```
 
+[EXAMPLE](https://stackblitz.com/edit/subjective?file=app%2Flist%2Flist.component.ts)
+
 ### Update function
 
 ```typescript
@@ -34,13 +39,13 @@ state.select(s => s.filter.type).subscribe(type => {
 state.update(f => f.updateFilterType, type);
 ```
 
+[EXAMPLE](https://stackblitz.com/edit/subjective?file=app%2Flist%2Flist.component.ts)
+
 ## Examples
 
 *   [Observable Service in Angular](examples/ANGULAR.md)
 *   [Angular E-commerce App - StackBlitz](https://stackblitz.com/edit/subjective?file=app%2Fcore%2Fstores%2Fproduct%2Fproduct.state.ts)
-*   [Tests](test/subjective.test.ts)
-
-![](./assets/v4.png)
+*   [Testing](examples/TESTING.md)
 
 ## NOTES
 

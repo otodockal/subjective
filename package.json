@@ -32,6 +32,8 @@
     "test": "jest --detectLeaks",
     "test:watch": "jest --watch",
     "test:prod": "npm run lint && npm run test -- --coverage --no-cache",
+    "perf": "npm run build && npm run perf:skipbuild",
+    "perf:skipbuild": "tsc -p perf/tsconfig.perf.json && node compiled/subjective && rimraf compiled",
     "deploy-docs": "ts-node tools/gh-pages-publish",
     "report-coverage": "cat ./coverage/lcov.info | coveralls",
     "commit": "git-cz"
@@ -89,7 +91,7 @@
     "rollup": "0.56.5",
     "rollup-plugin-commonjs": "9.0.0",
     "rollup-plugin-node-resolve": "3.2.0",
-    "rxjs": "5.5.6",
+    "rxjs": "6.0.0-beta.3",
     "ts-jest": "22.4.1",
     "ts-node": "5.0.1",
     "tsc-watch": "1.0.5",
@@ -98,6 +100,7 @@
     "typedoc": "0.11.1",
     "typescript": "2.7.2",
     "validate-commit-msg": "2.12.2",
-    "weak": "1.0.1"
+    "weak": "1.0.1",
+    "benchmark": "2.1.4"
   }
 }

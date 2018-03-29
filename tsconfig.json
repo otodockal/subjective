@@ -14,7 +14,6 @@
         "outDir": "compiled"
     },
     "include": [
-        "src",
-        "index"
+        "src"
     ]
 }

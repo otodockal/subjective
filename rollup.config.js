@@ -6,16 +6,12 @@ const { camelCase } = require('lodash');
 const libraryName = 'subjective';
 const input = `compiled/${libraryName}.js`;
 const external = [
-    'rxjs/BehaviorSubject',
-    'rxjs/Observable',
-    'rxjs/operators/distinctUntilChanged',
-    'rxjs/operators/map',
+    'rxjs',
+    'rxjs/operators',
 ];
 const globals = {
-    'rxjs/BehaviorSubject': 'Rx',
-    'rxjs/Observable': 'Rx',
-    'rxjs/operators/distinctUntilChanged': 'Rx',
-    'rxjs/operators/map': 'Rx',
+    'rxjs': 'Rx',
+    'rxjs/operators': 'Rx',
 };
 
 export default [

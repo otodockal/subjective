@@ -5,7 +5,6 @@
 *   Selector functions
 *   Update functions
 *   Composition
-*   RxJS 5.5 & RxJS 6 compatibility
 
 ## Concepts
 

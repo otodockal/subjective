@@ -1,6 +1,15 @@
 import { Observable, BehaviorSubject } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 
+export type SubjectivePayloadType<DATA> =
+    // is Array? infer object from Array
+    DATA extends Array<infer O>
+        ? { [K in keyof O]: O[K] }[] 
+        // is Object?
+        : DATA extends object 
+            ? { [K in keyof DATA]: DATA[K] } : DATA;
+
+
 export class Subjective<S, F> {
     private _subject = new BehaviorSubject<S>(this._initialState);
 
@@ -24,13 +33,15 @@ export class Subjective<S, F> {
     update(updateFn: (fns: F) => (state: S) => S): S;
     update<DATA>(
         updateFn: (fns: F) => (state: S, payload: DATA) => S,
-        payload: { [K in keyof DATA]: DATA[K] },
+        payload: SubjectivePayloadType<DATA>,
     ): S;
     update<DATA>(
-        updateFn: (fns: F) => (state: S, payload: DATA) => S,
-        payload?: { [K in keyof DATA]: DATA[K] },
+        updateFn: (fns: F) => (state: S, payload?: DATA) => S,
+        payload?: SubjectivePayloadType<DATA>,
     ): S {
-        this._subject.next(updateFn(this._updateFns)(this.snapshot, payload!));
+        this._subject.next(
+            updateFn(this._updateFns)(this.snapshot, payload as any),
+        );
         return this.snapshot;
     }
 

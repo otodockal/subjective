@@ -91,7 +91,7 @@ describe('Subjective', () => {
 
     it('update - no payload', () => {
         const state = new Subjective(new CounterState(), new CounterStateFns());
-        state.update(f => f.increaseCount);
+        state.update(f => f.increaseCount, undefined);
         expect(state.snapshot.count).toBe(1);
     });
 
@@ -120,6 +120,62 @@ describe('Subjective', () => {
         expect(s2 === s3).toBe(false);
     });
 
+    it('update - should not call subs cb on update with emitEvent=false but should call on the second update call with defined emitEvent:true', done => {
+        const state = new Subjective(new ProductState(), new ProductStateFns());
+        const obs = state.select(s => s.filter.a);
+
+        // subs -> skip initial value
+        subscription = obs.pipe(skip(1)).subscribe(value => {
+            expect(value).toEqual([{ id: '1', name: 'emitEvent:true' }]);
+            done();
+        });
+
+        // update, but do not fire event to call subs cb
+        const updatedState = state.update(
+            f => f.updateFilterA,
+            [{ id: '1', name: 'emitEvent:false' }],
+            false,
+        );
+
+        expect(updatedState.filter.a).toEqual([
+            { id: '1', name: 'emitEvent:false' },
+        ]);
+
+        // update, but fire event to call subs cb
+        state.update(
+            f => f.updateFilterA,
+            [{ id: '1', name: 'emitEvent:true' }],
+            true,
+        );
+    });
+
+    it('update - should not call subs cb on update with emitEvent=false but should call on the second update call with missing option obj', done => {
+        const state = new Subjective(new ProductState(), new ProductStateFns());
+        const obs = state.select(s => s.filter.a);
+
+        // subs -> skip initial value
+        subscription = obs.pipe(skip(1)).subscribe(value => {
+            expect(value).toEqual([{ id: '1', name: 'emitEvent:true' }]);
+            done();
+        });
+
+        // update, but do not fire event to call subs cb
+        const updatedState = state.update(
+            f => f.updateFilterA,
+            [{ id: '1', name: 'emitEvent:false' }],
+            false,
+        );
+
+        expect(updatedState.filter.a).toEqual([
+            { id: '1', name: 'emitEvent:false' },
+        ]);
+
+        // update, but fire event to call subs cb
+        state.update(f => f.updateFilterA, [
+            { id: '1', name: 'emitEvent:true' },
+        ]);
+    });
+
     it(`select - should
         1. update prop query, 
         2. call subscribe callback on query prop change
@@ -132,7 +188,6 @@ describe('Subjective', () => {
             expect(value).toBe('Oto');
             done();
         });
-
         state.update(f => f.updateQuery, 'Oto');
         state.update(f => f.updateFilterA, [
             {

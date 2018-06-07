@@ -1,17 +1,13 @@
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Observable } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
+import { _InternalSubject } from './subject';
 
-export type SubjectivePayloadType<DATA> =
-    // is Array? infer object from Array
-    DATA extends Array<infer O>
-        ? { [K in keyof O]: O[K] }[] 
-        // is Object?
-        : DATA extends object 
-            ? { [K in keyof DATA]: DATA[K] } : DATA;
-
+export type SubjectivePayload<DATA> = DATA extends Array<infer O>
+    ? { [K in keyof O]: O[K] }[]
+    : DATA extends object ? { [K in keyof DATA]: DATA[K] } : DATA;
 
 export class Subjective<S, F> {
-    private _subject = new BehaviorSubject<S>(this._initialState);
+    private _subject = new _InternalSubject<S>(this._initialState);
 
     /**
      * Subjective
@@ -25,23 +21,21 @@ export class Subjective<S, F> {
      * - optionally with a payload
      * - return the last snapshot of updated state
      * EXAMPLES:
-     * - state.update(f => f.updateQuery)
      * - state.update(f => f.updateQuery, 'food')
-     * - const lastState = state.update(f => f.updateQuery)
+     * - state.update(f => f.updateQuery, 'food', false)
      * - const lastState = state.update(f => f.updateQuery, 'food')
      */
-    update(updateFn: (fns: F) => (state: S) => S): S;
-    update<DATA>(
-        updateFn: (fns: F) => (state: S, payload: DATA) => S,
-        payload: SubjectivePayloadType<DATA>,
-    ): S;
     update<DATA>(
         updateFn: (fns: F) => (state: S, payload?: DATA) => S,
-        payload?: SubjectivePayloadType<DATA>,
+        payload: SubjectivePayload<DATA>,
+        emitEvent?: boolean,
     ): S {
-        this._subject.next(
-            updateFn(this._updateFns)(this.snapshot, payload as any),
-        );
+        const v = updateFn(this._updateFns)(this.snapshot, payload as any);
+        if (emitEvent === false) {
+            this._subject.value = v;
+        } else {
+            this._subject.next(v);
+        }
         return this.snapshot;
     }
 

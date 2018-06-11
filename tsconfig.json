@@ -11,7 +11,8 @@
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
         "declarationDir": "dist/types",
-        "outDir": "compiled"
+        "outDir": "compiled",
+        "skipLibCheck": true
     },
     "include": [
         "src"

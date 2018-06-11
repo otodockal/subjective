@@ -3,7 +3,6 @@ import {
     Subject,
     Subscriber,
     Subscription,
-    SubscriptionLike,
 } from 'rxjs';
 
 export class _InternalSubject<T> extends Subject<T> {
@@ -11,10 +10,11 @@ export class _InternalSubject<T> extends Subject<T> {
         super();
     }
 
-    /** @deprecated This is an internal implementation detail, do not use. */
-    _subscribe(subscriber: Subscriber<T>): Subscription {
+    /** @deprecated internal use only */ _subscribe(
+        subscriber: Subscriber<T>,
+    ): Subscription {
         const subscription = super._subscribe(subscriber);
-        if (subscription && !(<SubscriptionLike>subscription).closed) {
+        if (subscription && !subscription.closed) {
             subscriber.next(this.value);
         }
         return subscription;

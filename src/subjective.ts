@@ -2,9 +2,10 @@ import { Observable } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 import { _InternalSubject } from './subject';
 
-export type SubjectivePayload<DATA> = DATA extends Array<infer O>
-    ? { [K in keyof O]: O[K] }[]
-    : DATA extends object ? { [K in keyof DATA]: DATA[K] } : DATA;
+// TODO: TS 2.8
+// export type SubjectivePayload<DATA> = DATA extends Array<infer O>
+//     ? { [K in keyof O]: O[K] }[]
+//     : DATA extends object ? { [K in keyof DATA]: DATA[K] } : DATA;
 
 export class Subjective<S, F> {
     private _subject = new _InternalSubject<S>(this._initialState);
@@ -27,7 +28,7 @@ export class Subjective<S, F> {
      */
     update<DATA>(
         updateFn: (fns: F) => (state: S, payload?: DATA) => S,
-        payload: SubjectivePayload<DATA>,
+        payload: { [K in keyof DATA]: DATA[K] },
         emitEvent?: boolean,
     ): S {
         const v = updateFn(this._updateFns)(this.snapshot, payload as any);

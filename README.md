@@ -23,9 +23,13 @@ const state = new Subjective(
 ### Selector function
 
 ```typescript
-// subscribe to state.filter.type
+// subscribe to state.filter.type and notify with its value
 state.select(s => s.filter.type).subscribe(type => {
     console.log(type);
+});
+// subscribe to state.filter.type and notify with a whole state
+state.select(s => s.filter.type, true).subscribe(state => {
+    console.log(state);
 });
 ```
 
@@ -34,8 +38,12 @@ state.select(s => s.filter.type).subscribe(type => {
 ### Update function
 
 ```typescript
-// change value of state.filter.type
+// update value of state.filter.type
 state.update(f => f.updateFilterType, type);
+// update value of state.filter.type and do not notify subscribers
+state.update(f => f.updateFilterType, type, false);
+// update value of state.filter.type and return updated state
+const updatedState = state.update(f => f.updateFilterType, type);
 ```
 
 [EXAMPLE](https://stackblitz.com/edit/subjective?file=app%2Flist%2Flist.component.ts)

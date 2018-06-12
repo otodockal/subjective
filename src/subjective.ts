@@ -19,15 +19,17 @@ export class Subjective<S, F> {
 
     /**
      * Update function
-     * - optionally with a payload
-     * - return the last snapshot of updated state
-     * EXAMPLES:
-     * - state.update(f => f.updateQuery, 'food')
-     * - state.update(f => f.updateQuery, 'food', false)
-     * - const lastState = state.update(f => f.updateQuery, 'food')
+     * @example
+     * // update value
+     * state.update(f => f.updateQuery, 'food')
+     * // update value and do not notify subscribers
+     * state.update(f => f.updateQuery, 'food', false)
+     * // update value and return updated state
+     * const updatedState = state.update(f => f.updateQuery, 'food')
      */
     update<DATA>(
         updateFn: (fns: F) => (state: S, payload?: DATA) => S,
+        // payload: SubjectivePayload<DATA>,
         payload: { [K in keyof DATA]: DATA[K] },
         emitEvent?: boolean,
     ): S {
@@ -43,12 +45,11 @@ export class Subjective<S, F> {
     /**
      * State selector
      * - subscribe to a key defined by selectorFn
-     * - return value of the key or whole state
-     * EXAMPLES:
-     * - state.select(s => s.items)
-     * - state.select(s => s.items, true)
-     * - state.select(s => s.filter.types)
-     * - state.select(s => s.filter.types, true)
+     * @example
+     * // subscribe to a key and notify with its value
+     * state.select(s => s.filter.types).subscribe()
+     * // subscribe to a key and notify with a whole state
+     * state.select(s => s.filter.types, true).subscribe()
      */
     select<K>(
         selectorFn: (state: S) => K,
@@ -81,8 +82,9 @@ export class Subjective<S, F> {
     /**
      * Initial state
      * - useful for resetting the state
-     * EXAMPLES:
-     * - update functions should be pure, so update function with initial state
+     * @example
+     * // update functions should be pure, so update function with initial state
+     * state.update(f => f.resetFilterType, state.initialState.resetFilterType)
      */
     get initialState() {
         return this._initialState;

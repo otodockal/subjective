@@ -27,13 +27,14 @@ export class Subjective<S, F> {
      * // update value and return updated state
      * const updatedState = state.update(f => f.updateQuery, 'food')
      */
-    update<DATA>(
-        updateFn: (fns: F) => (state: S, payload?: DATA) => S,
+    update<DATA = undefined>(
+        updateFn: (fns: F) => (state: S, payload: DATA) => S,
+        // TODO: TS 2.8
         // payload: SubjectivePayload<DATA>,
         payload: { [K in keyof DATA]: DATA[K] },
         emitEvent?: boolean,
     ): S {
-        const v = updateFn(this._updateFns)(this.snapshot, payload as any);
+        const v = updateFn(this._updateFns)(this.snapshot, payload);
         if (emitEvent === false) {
             this._subject.value = v;
         } else {

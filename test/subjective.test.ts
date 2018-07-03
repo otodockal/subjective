@@ -1,5 +1,5 @@
 import { Subjective } from '../src/subjective';
-import { Subscription, Observable } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { skip } from 'rxjs/operators';
 
 // CounterState

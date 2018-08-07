@@ -63,6 +63,9 @@ Always use [immutable pattern](https://glimmerjs.com/guides/tracked-properties) 
 
 Types are always inferred either from state class or payload parameter of the update function.
 
+## FUTURE
+I've been thinking of [this new syntax...check it out](EXP.md). 
+
 ## Credits
 
 *   [RxJS](https://github.com/ReactiveX/rxjs)

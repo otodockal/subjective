@@ -78,6 +78,15 @@ class ProductStateFns {
             },
         };
     }
+    updateWholeFilter(
+        state: ProductState,
+        filter: ProductState['filter'],
+    ): ProductState {
+        return {
+            ...state,
+            filter,
+        };
+    }
 }
 
 describe('Subjective', () => {
@@ -174,6 +183,26 @@ describe('Subjective', () => {
         state.update(f => f.updateFilterA, [
             { id: '1', name: 'emitEvent:true' },
         ]);
+    });
+
+    it('update - should update whole filter', done => {
+        const state = new Subjective(new ProductState(), new ProductStateFns());
+
+        expect(state.snapshot.filter).toEqual({ a: [], b: [], c: true });
+
+        const res = state.update(f => f.updateWholeFilter, {
+            a: [{ id: '1', name: 'filterA' }],
+            b: [{ id: '1', name: 'filterB' }],
+            c: true,
+        });
+
+        expect(res.filter).toEqual({
+            a: [{ id: '1', name: 'filterA' }],
+            b: [{ id: '1', name: 'filterB' }],
+            c: true,
+        });
+
+        done();
     });
 
     it(`select - should

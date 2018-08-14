@@ -11,7 +11,6 @@
 ### State
 
 ```typescript
-// define new state
 const state = new Subjective(
     productState,
     productStateFns,
@@ -22,11 +21,14 @@ const state = new Subjective(
 
 ### Selector function
 
-```typescript
-// subscribe to state.filter.type and notify with its value
-state.select(s => s.filter.type).subscribe();
+##### Subscribe to state.filter.type and notify with its value
 
-// subscribe to state.filter.type and notify with a whole state
+```typescript
+state.select(s => s.filter.type).subscribe();
+```
+
+##### Subscribe to state.filter.type and notify with a whole state
+```
 state.select(s => s.filter.type, true).subscribe();
 ```
 
@@ -34,16 +36,22 @@ state.select(s => s.filter.type, true).subscribe();
 
 ### Update function
 
+##### Update value of state.filter.type
+
 ```typescript
-// update value of state.filter.type
 state.update(f => f.updateFilterType, type);
+```
 
-// update value of state.filter.type and do not notify subscribers
+##### Update value of state.filter.type and do not notify subscribers
+```
 state.update(f => f.updateFilterType, type, false);
+```
 
-// update value of state.filter.type and return updated state
+##### Update value of state.filter.type and return updated state
+```
 const updatedState = state.update(f => f.updateFilterType, type);
 ```
+
 
 [EXAMPLE](https://stackblitz.com/edit/subjective?file=app%2Flist%2Flist.component.ts)
 

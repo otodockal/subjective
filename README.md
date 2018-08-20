@@ -28,7 +28,7 @@ state.select(s => s.filter.type).subscribe();
 ```
 
 ##### Subscribe to state.filter.type and notify with a whole state
-```
+```typescript
 state.select(s => s.filter.type, true).subscribe();
 ```
 
@@ -43,12 +43,12 @@ state.update(f => f.updateFilterType, type);
 ```
 
 ##### Update value of state.filter.type and do not notify subscribers
-```
+```typescript
 state.update(f => f.updateFilterType, type, false);
 ```
 
 ##### Update value of state.filter.type and return updated state
-```
+```typescript
 const updatedState = state.update(f => f.updateFilterType, type);
 ```
 

@@ -61,7 +61,7 @@ export class Subjective<S, F> {
     ): Observable<K | S> {
         return this._subject.pipe(
             // if stream is paused return empty observable
-            switchMap(value => (this._pause === false ? of(value) : empty())),
+            switchMap(state => (this._pause === false ? of(state) : empty())),
             map(state => selectorFn(state)),
             distinctUntilChanged(),
             map(value => {

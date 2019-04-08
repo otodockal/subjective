@@ -1,9 +1,9 @@
-import { Observable } from 'rxjs';
-import { distinctUntilChanged, map } from 'rxjs/operators';
-import { _InternalSubject } from './subject';
+import { BehaviorSubject, empty, Observable, of } from 'rxjs';
+import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 
 export class Subjective<S, F> {
-    private _subject = new _InternalSubject<S>(this._initialState);
+    private _subject = new BehaviorSubject(this._initialState);
+    private _pause = false;
 
     /**
      * Subjective
@@ -27,16 +27,14 @@ export class Subjective<S, F> {
         payload: DATA extends Array<infer O>
             ? { [K in keyof O]: O[K] }[]
             : DATA extends object
-                ? { [K in keyof DATA]: DATA[K] }
-                : DATA,
+            ? { [K in keyof DATA]: DATA[K] }
+            : DATA,
         emitEvent?: boolean,
     ): S {
-        const v = updateFn(this._updateFns)(this.snapshot, payload as any);
-        if (emitEvent === false) {
-            this._subject.value = v;
-        } else {
-            this._subject.next(v);
-        }
+        this._pause = emitEvent === false;
+        this._subject.next(
+            updateFn(this._updateFns)(this.snapshot, payload as DATA),
+        );
         return this.snapshot;
     }
 
@@ -62,6 +60,8 @@ export class Subjective<S, F> {
         returnWholeState?: boolean,
     ): Observable<K | S> {
         return this._subject.pipe(
+            // if stream is paused return empty observable
+            switchMap(value => (this._pause === false ? of(value) : empty())),
             map(state => selectorFn(state)),
             distinctUntilChanged(),
             map(value => {

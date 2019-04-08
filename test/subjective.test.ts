@@ -1,6 +1,6 @@
 import { Subjective } from '../src/subjective';
 import { Subscription } from 'rxjs';
-import { skip } from 'rxjs/operators';
+import { skip, bufferCount } from 'rxjs/operators';
 
 // CounterState
 class CounterState {
@@ -129,28 +129,44 @@ describe('Subjective', () => {
         expect(s2 === s3).toBe(false);
     });
 
-    it('update - should not call subs cb on update with emitEvent=false but should call on the second update call with defined emitEvent:true', done => {
+    it('update - should not call subs cb on update with emitEvent=false but should call on the third update call with defined emitEvent:true', done => {
         const state = new Subjective(new ProductState(), new ProductStateFns());
         const obs = state.select(s => s.filter.a);
 
-        // subs -> skip initial value
-        subscription = obs.pipe(skip(1)).subscribe(value => {
-            expect(value).toEqual([{ id: '1', name: 'emitEvent:true' }]);
+        obs.pipe(bufferCount(2)).subscribe(value => {
+            expect(value).toEqual([
+                // 0. update === default value
+                [],
+                // 3. update
+                [{ id: '1', name: 'emitEvent:true' }],
+            ]);
             done();
         });
 
-        // update, but do not fire event to call subs cb
+        // 0. update === default value
+        expect(state.snapshot.filter.a).toEqual([]);
+
+        // 1. update, but do not fire event to call subs cb
         const updatedState = state.update(
             f => f.updateFilterA,
             [{ id: '1', name: 'emitEvent:false' }],
             false,
         );
-
         expect(updatedState.filter.a).toEqual([
             { id: '1', name: 'emitEvent:false' },
         ]);
 
-        // update, but fire event to call subs cb
+        // 2. update, but do not fire event to call subs cb
+        const updatedState1 = state.update(
+            f => f.updateFilterA,
+            [{ id: '1', name: 'emitEvent:false - 2' }],
+            false,
+        );
+        expect(updatedState1.filter.a).toEqual([
+            { id: '1', name: 'emitEvent:false - 2' },
+        ]);
+
+        // 3. update, but fire event to call subs cb
         state.update(
             f => f.updateFilterA,
             [{ id: '1', name: 'emitEvent:true' }],

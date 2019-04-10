@@ -2,7 +2,9 @@ import { BehaviorSubject, empty, Observable, of } from 'rxjs';
 import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 
 export class Subjective<S, F> {
+    // state
     private _subject = new BehaviorSubject(this._initialState);
+    // pause stream
     private _pause = false;
 
     /**

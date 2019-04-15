@@ -1,18 +1,26 @@
 import { BehaviorSubject, empty, Observable, of } from 'rxjs';
 import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
+import { logByType } from './fns';
+
+export type Logger = (updateFnName: string, payload: any) => void;
 
 export class Subjective<S, F> {
     // state
     private _subject = new BehaviorSubject(this._initialState);
-    // pause stream
+    // pause the stream
     private _pause = false;
 
     /**
      * Subjective
      * @param _initialState Inital state
      * @param _updateFns Update functions
+     * @param _logger Log update functions (Dev only)
      */
-    constructor(private _initialState: S, private _updateFns: F) {}
+    constructor(
+        private _initialState: S,
+        private _updateFns: F,
+        private _logger?: Logger | boolean,
+    ) {}
 
     /**
      * Update function
@@ -33,7 +41,11 @@ export class Subjective<S, F> {
             : DATA,
         emitEvent?: boolean,
     ): S {
+        // pause stream?
         this._pause = emitEvent === false;
+        // log update functions (dev only)
+        this._logger && logByType(this._logger, updateFn, payload);
+        // update the state
         this._subject.next(
             updateFn(this._updateFns)(this.snapshot, payload as DATA),
         );

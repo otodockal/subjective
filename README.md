@@ -5,6 +5,7 @@
 *   Selector functions
 *   Update functions
 *   Composition
+*   Logging
 
 ## Concepts
 
@@ -14,6 +15,30 @@
 const state = new Subjective(
     productState,
     productStateFns,
+);
+```
+
+##### Default Logger
+
+```typescript
+const state = new Subjective(
+    productState,
+    productStateFns,
+    // use default Logger (dev only)
+    true
+);
+```
+
+##### Custom Logger
+
+```typescript
+const state = new Subjective(
+    productState,
+    productStateFns,
+    // use custom Logger (dev only)
+    (updateFnName: string, payload: any) => {
+        // LOG
+    }
 );
 ```
 

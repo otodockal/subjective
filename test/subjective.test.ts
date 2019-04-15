@@ -89,6 +89,29 @@ class ProductStateFns {
     }
 }
 
+// Logger
+class LoggerState {
+    filter = {
+        a: false
+    }
+}
+
+class LoggerStateFns {
+    filter = {
+        // 2nd level
+        updateA (state: LoggerState, a: boolean): LoggerState {
+            return {
+                ...state,
+                filter: {
+                    ...state.filter,
+                    a
+                }
+            }
+        }
+    }
+}
+
+
 describe('Subjective', () => {
     let subscription: Subscription;
 
@@ -462,4 +485,37 @@ describe('Subjective', () => {
         // verify initial state
         expect(state.initialState).toEqual(new ProductState());
     });
+
+    // Logger
+    it('should use default Logger', () => {
+        const spy = spyOn(console, 'log');
+        const state = new Subjective(new LoggerState(), new LoggerStateFns(), true);
+        // update nested state
+        state.update(f => f.filter.updateA, false);
+        expect(spy).toHaveBeenCalledWith('filter.updateA:false');
+    });
+
+    it('should use custom Logger', (done) => {
+        const state = new Subjective(
+            new LoggerState(), 
+            new LoggerStateFns(),
+            // custom Logger
+            (updateFnName: string, payload: any) => {
+                expect(updateFnName).toBe('filter.updateA');
+                expect(payload).toBe(false);
+                done();
+            }
+        );
+        // update nested state
+        state.update(f => f.filter.updateA, false);
+    });
+
+    it('should NOT use default Logger', () => {
+        const spy = spyOn(console, 'log');
+        const state = new Subjective(new LoggerState(), new LoggerStateFns(), false);
+        // update nested state
+        state.update(f => f.filter.updateA, false);
+        expect(spy).not.toHaveBeenCalledWith('filter.updateA:false');
+    });
+
 });

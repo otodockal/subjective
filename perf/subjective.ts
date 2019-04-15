@@ -8,7 +8,6 @@ const {
 const { BehaviorSubject, asyncScheduler: async } = require('rxjs');
 const Benchmark = require('benchmark');
 
-
 // define state
 interface FilterA {
     id: string;
@@ -43,7 +42,16 @@ const stateSubjective = new Subjective(
     new ProductState(),
     new ProductStateFns(),
 );
-let subs = null;
+
+// Subjective with Logger
+const stateSubjectiveLoger = new Subjective(
+    new ProductState(),
+    new ProductStateFns(),
+    // custom logger
+    (updateFnName: string, payload: any) => {
+        // log!
+    },
+);
 
 // BehaviorSubject
 const productStateBS = new ProductState();
@@ -55,15 +63,6 @@ suite
     .add(
         'Subjective',
         function(d) {
-            // if (subs) subs.unsubscribe();
-
-            // subs = stateSubjective
-            //     .select(s => s.filter.a)
-            //     .pipe(skip(1), observeOn(async))
-            //     .subscribe(res => {
-            //         d.resolve();
-            //     });
-
             stateSubjective.update(f => f.updateFilterA, [
                 { id: '1', name: 'test' + Math.random() },
                 { id: '2', name: 'test2' + Math.random() },
@@ -71,23 +70,19 @@ suite
         },
         { defer: false },
     )
-
+    .add(
+        'Subjective with Logger',
+        function(d) {
+            stateSubjectiveLoger.update(f => f.updateFilterA, [
+                { id: '1', name: 'test' + Math.random() },
+                { id: '2', name: 'test2' + Math.random() },
+            ]);
+        },
+        { defer: false },
+    )
     .add(
         'BehaviorSubject',
         function(d) {
-            // if (subs) subs.unsubscribe();
-
-            // subs = stateBehaviorSubject
-            //     .pipe(
-            //         map(s => s.filter.a),
-            //         distinctUntilChanged(),
-            //         skip(1),
-            //         observeOn(async),
-            //     )
-            //     .subscribe(() => {
-            //         d.resolve();
-            //     });
-
             const newState = {
                 ...productStateBS,
                 filter: {
@@ -107,18 +102,6 @@ suite
     .add(
         'BehaviorSubject - mutations',
         function(d) {
-            // if (subs) subs.unsubscribe();
-            // subs = stateBehaviorSubject
-            //     .pipe(
-            //         map(i => i.filter.a),
-            //         // distinctUntilChanged(),     // NOTE: we can't because of mutations
-            //         skip(1),
-            //         observeOn(async),
-            //     )
-            //     .subscribe(() => {
-            //         d.resolve();
-            //     });
-
             productStateBS.filter.a = [
                 { id: '1', name: 'test' + Math.random() },
                 { id: '2', name: 'test2' + Math.random() },

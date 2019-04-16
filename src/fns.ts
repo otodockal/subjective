@@ -30,12 +30,9 @@ function _parseUpdateFunctionName<F, S, DATA>(
     try {
         // stringify
         const ff = updateFn.toString();
-        // split by first "." character until line break
+        // split by first "." character until line break, ";", "}" or space...
         // ...because it's always like "f.updateA" or "f.filter.updateA"
-        const fnName = ff.split(/\.(.+)/)[1];
-        // match only allowed characters...
-        const match = fnName.match(/[a-z0-9\.]/gi);
-        return match ? match.join('') : 'UnknownFnName';
+        return ff.split(/\.(.[^(\;|\s|\})]+)/)[1];
     } catch {
         return 'UnknownFnName';
     }

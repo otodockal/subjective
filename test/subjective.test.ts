@@ -92,25 +92,33 @@ class ProductStateFns {
 // Logger
 class LoggerState {
     filter = {
-        a: false
-    }
+        a: false,
+    };
+    b = false;
 }
 
 class LoggerStateFns {
     filter = {
         // 2nd level
-        updateA (state: LoggerState, a: boolean): LoggerState {
+        updateA(state: LoggerState, a: boolean): LoggerState {
             return {
                 ...state,
                 filter: {
                     ...state.filter,
-                    a
-                }
-            }
-        }
+                    a,
+                },
+            };
+        },
+    };
+    // 1st level
+    // snake case? yeah!
+    update_b(state: LoggerState, b: boolean): LoggerState {
+        return {
+            ...state,
+            b,
+        };
     }
 }
-
 
 describe('Subjective', () => {
     let subscription: Subscription;
@@ -489,22 +497,26 @@ describe('Subjective', () => {
     // Logger
     it('should use default Logger', () => {
         const spy = spyOn(console, 'log');
-        const state = new Subjective(new LoggerState(), new LoggerStateFns(), true);
+        const state = new Subjective(
+            new LoggerState(),
+            new LoggerStateFns(),
+            true,
+        );
         // update nested state
         state.update(f => f.filter.updateA, false);
         expect(spy).toHaveBeenCalledWith('filter.updateA:false');
     });
 
-    it('should use custom Logger', (done) => {
+    it('should use custom Logger', done => {
         const state = new Subjective(
-            new LoggerState(), 
+            new LoggerState(),
             new LoggerStateFns(),
             // custom Logger
             (updateFnName: string, payload: any) => {
                 expect(updateFnName).toBe('filter.updateA');
                 expect(payload).toBe(false);
                 done();
-            }
+            },
         );
         // update nested state
         state.update(f => f.filter.updateA, false);
@@ -512,10 +524,25 @@ describe('Subjective', () => {
 
     it('should NOT use default Logger', () => {
         const spy = spyOn(console, 'log');
-        const state = new Subjective(new LoggerState(), new LoggerStateFns(), false);
+        const state = new Subjective(
+            new LoggerState(),
+            new LoggerStateFns(),
+            false,
+        );
         // update nested state
         state.update(f => f.filter.updateA, false);
         expect(spy).not.toHaveBeenCalledWith('filter.updateA:false');
     });
 
+    it('should log updateFn which is using snake case naming', () => {
+        const spy = spyOn(console, 'log');
+        const state = new Subjective(
+            new LoggerState(),
+            new LoggerStateFns(),
+            true,
+        );
+        // update by using snake case update fn
+        state.update(f => f.update_b, true);
+        expect(spy).toHaveBeenCalledWith('update_b:true');
+    });
 });

@@ -545,4 +545,18 @@ describe('Subjective', () => {
         state.update(f => f.update_b, true);
         expect(spy).toHaveBeenCalledWith('update_b:true');
     });
+
+    it('should throw error if Logger is not either boolean or function', () => {
+        try {
+            const state = new Subjective(
+                new LoggerState(),
+                new LoggerStateFns(),
+                {} as any,
+            );
+            state.update(f => f.filter.updateA, true);
+        } catch (error) {
+            expect(error).toBe('Logger type can be either function or boolean.');
+        }
+    })
+
 });

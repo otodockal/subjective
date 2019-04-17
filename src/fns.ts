@@ -13,7 +13,7 @@ export function logByType<F, S, DATA>(
         // use default console logger
         _consoleLogger(fnName, payload);
     } else {
-        throw 'Logger can be type either function or boolean';
+        throw 'Logger type can be either function or boolean.';
     }
 }
 
@@ -34,7 +34,7 @@ function _parseUpdateFunctionName<F, S, DATA>(
         // ...because it's always like "f.updateA" or "f.filter.updateA"
         return ff.split(/\.(.[^(\;|\s|\})]+)/)[1];
     } catch {
-        return 'UnknownFnName';
+        return 'UnknownUpdateFnName';
     }
 }
 

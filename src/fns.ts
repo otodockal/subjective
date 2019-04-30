@@ -8,7 +8,6 @@ export function logByType<F, S, DATA>(
     const fnName = _parseUpdateFunctionName(updateFn);
     if (typeof logger === 'function') {
         // custom logger
-        // TODO: add test
         logger(fnName, payload, updateFn);
     } else if (typeof logger === 'boolean') {
         // use default console logger

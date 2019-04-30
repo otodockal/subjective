@@ -8,10 +8,11 @@ export function logByType<F, S, DATA>(
     const fnName = _parseUpdateFunctionName(updateFn);
     if (typeof logger === 'function') {
         // custom logger
-        logger(fnName, payload);
+        // TODO: add test
+        logger(fnName, payload, updateFn);
     } else if (typeof logger === 'boolean') {
         // use default console logger
-        _consoleLogger(fnName, payload);
+        _consoleLogger(fnName, payload, updateFn);
     } else {
         throw 'Logger type can be either function or boolean.';
     }
@@ -41,11 +42,21 @@ function _parseUpdateFunctionName<F, S, DATA>(
 /**
  * Default Console logger
  */
-function _consoleLogger(fnName: string, payload: any) {
+function _consoleLogger(fnName: string, payload: any, updateFnRef: Function) {
     try {
         const data = JSON.stringify(payload);
+        const dataTrimmed = data.substring(0, 80);
         // logging to console
-        console.log(fnName + ':' + data.substring(0, 100));
+        console.groupCollapsed(
+            `%c${fnName}: %c${dataTrimmed}${
+                dataTrimmed.length < data.length ? '…' : ''
+            }`,
+            `color: green; font-weight: 300;`,
+            `color: gray; font-weight: 100;`,
+        );
+        console.log(payload);
+        console.log(updateFnRef);
+        console.groupEnd();
     } catch {
         console.warn(
             `Subjective:Logger: We could not stringify ${fnName}:`,

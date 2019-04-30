@@ -1,8 +1,8 @@
 import { BehaviorSubject, empty, Observable, of } from 'rxjs';
-import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
+import { distinctUntilChanged, map, switchMap, scan } from 'rxjs/operators';
 import { logByType } from './fns';
 
-export type Logger = (updateFnName: string, payload: any) => void;
+export type Logger = (updateFnName: string, payload: any, updateFnRef: Function) => void;
 
 export class Subjective<S, F> {
     // state

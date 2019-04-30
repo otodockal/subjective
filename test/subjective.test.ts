@@ -495,16 +495,32 @@ describe('Subjective', () => {
     });
 
     // Logger
-    it('should use default Logger', () => {
-        const spy = spyOn(console, 'log');
+    it('should use default Logger - group + payload + updateFnRef', () => {
+        const spy = spyOn(console, 'groupCollapsed').calls;
+        const spy1 = spyOn(console, 'log').calls;
+
         const state = new Subjective(
             new LoggerState(),
             new LoggerStateFns(),
             true,
         );
+
         // update nested state
         state.update(f => f.filter.updateA, false);
-        expect(spy).toHaveBeenCalledWith('filter.updateA:false');
+
+        // console.groupCollapsed with formatting
+        expect(spy.allArgs().toString()).toBe(
+            '%cfilter.updateA: %cfalse,color: green; font-weight: 300;,color: gray; font-weight: 100;',
+        );
+        // 1. console.log
+        expect(spy1.argsFor(0).toString()).toBe('false');
+        // 2. console.log
+        expect(
+            spy1
+                .argsFor(1)
+                .toString()
+                .includes('f.filter.updateA'),
+        ).toBe(true);
     });
 
     it('should use custom Logger', done => {
@@ -512,9 +528,12 @@ describe('Subjective', () => {
             new LoggerState(),
             new LoggerStateFns(),
             // custom Logger
-            (updateFnName: string, payload: any) => {
+            (updateFnName: string, payload: any, updateFnRef: Function) => {
                 expect(updateFnName).toBe('filter.updateA');
                 expect(payload).toBe(false);
+                expect(
+                    updateFnRef.toString().includes('f.filter.updateA'),
+                ).toBe(true);
                 done();
             },
         );
@@ -531,11 +550,13 @@ describe('Subjective', () => {
         );
         // update nested state
         state.update(f => f.filter.updateA, false);
-        expect(spy).not.toHaveBeenCalledWith('filter.updateA:false');
+        expect(spy).not.toHaveBeenCalled();
     });
 
     it('should log updateFn which is using snake case naming', () => {
-        const spy = spyOn(console, 'log');
+        const spy = spyOn(console, 'groupCollapsed').calls;
+        const spy1 = spyOn(console, 'log').calls;
+
         const state = new Subjective(
             new LoggerState(),
             new LoggerStateFns(),
@@ -543,7 +564,20 @@ describe('Subjective', () => {
         );
         // update by using snake case update fn
         state.update(f => f.update_b, true);
-        expect(spy).toHaveBeenCalledWith('update_b:true');
+
+        // console.groupCollapsed with formatting
+        expect(spy.allArgs().toString()).toBe(
+            '%cupdate_b: %ctrue,color: green; font-weight: 300;,color: gray; font-weight: 100;',
+        );
+        // 1. console.log
+        expect(spy1.argsFor(0).toString()).toBe('true');
+        // 2. console.log
+        expect(
+            spy1
+                .argsFor(1)
+                .toString()
+                .includes('update_b'),
+        ).toBe(true);
     });
 
     it('should throw error if Logger is not either boolean or function', () => {
@@ -555,8 +589,9 @@ describe('Subjective', () => {
             );
             state.update(f => f.filter.updateA, true);
         } catch (error) {
-            expect(error).toBe('Logger type can be either function or boolean.');
+            expect(error).toBe(
+                'Logger type can be either function or boolean.',
+            );
         }
-    })
-
+    });
 });

@@ -1,11 +1,10 @@
 # Subjective
 
 *   Opinionated state management
-*   Type safety by design
-*   Selector functions
-*   Update functions
-*   Composition
-*   Logging
+*   Type safety by design. Type inference works for both Update and Selector functions.
+*   Logging. Inspect where Update function was called.
+*   Pause observable stream, if needed.
+*   Always receive the whole state, if needed.
 
 ## Concepts
 
@@ -36,8 +35,21 @@ const state = new Subjective(
     productState,
     productStateFns,
     // use custom Logger (dev only)
-    (updateFnName: string, payload: any) => {
+    (updateFnName: string, payload: any, updateFnRef: Function) => {
         // LOG
+        const data = JSON.stringify(payload);
+        const dataTrimmed = data.substring(0, 80);
+        // logging to console
+        console.groupCollapsed(
+            `%c${fnName}: %c${dataTrimmed}${
+                dataTrimmed.length < data.length ? '…' : ''
+            }`,
+            `color: green; font-weight: 300;`,
+            `color: gray; font-weight: 100;`,
+        );
+        console.log(payload);
+        console.log(updateFnRef);
+        console.groupEnd();
     }
 );
 ```
